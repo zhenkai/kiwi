@@ -19,12 +19,11 @@
 VideoWindow::VideoWindow(): QDialog(0) {
 	QSettings settings("UCLA_IRL", "KIWI");
 	localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
-	changeLocalUsername();
-	/*
+
 	if (localUsername == "") {
-		QTimer::singleShot(50, this, SLOT(changeLocalUsername()));
+	//	QTimer::singleShot(50, this, SLOT(changeLocalUsername()));
+		changeLocalUsername();
 	}
-	*/
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	layout = new QGridLayout(this);
 	source = new VideoStreamSource();
