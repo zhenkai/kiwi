@@ -160,7 +160,8 @@ void VideoStreamSource::readNdnParams() {
 		abort();
 	}
 
-	username = getenv("KIWI_USERNAME");
+	QSettings kiwiSettings("UCLA_IRL", "KIWI");
+	username = kiwiSettings.value("KiwiLocalUsername", QString("")).toString();
 	if (username.isEmpty()) {
 		QMessageBox::warning(0, "Kiwi", "Environment variable \"KIWI_USERNAME\" not set. Program terminating.");
 		std::exit(0);
@@ -256,7 +257,8 @@ SourceAnnouncer::SourceAnnouncer(QString confName, QString prefix) {
 
 	this->confName = confName;
 	this->prefix = prefix;
-	username = getenv("KIWI_USERNAME");
+	QSettings settings("UCLA_IRL", "KIWI");
+	username = settings.value("KiwiLocalUsername", QString("")).toString();
 	if (username.isEmpty()) {
 		QMessageBox::warning(0, "Kiwi", "Environment variable \"KIWI_USERNAME\" not set. Program terminating.");
 		std::exit(0);

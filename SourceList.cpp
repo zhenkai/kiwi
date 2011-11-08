@@ -296,7 +296,9 @@ int SourceList::addMediaSource(QString username, QString prefix) {
 	list.insert(username, ms);
 
 	// do not report self to other module
-	if (username == getenv("KIWI_USERNAME")) {
+	QSettings settings("UCLA_IRL", "KIWI");
+	QString localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
+	if (username == localUsername) {
 		fprintf(stderr, "ignore self\n");
 		return 0;
 	}

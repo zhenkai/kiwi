@@ -33,6 +33,9 @@ MediaFetcher::MediaFetcher (SourceList *sourceList) {
 	pthread_mutexattr_settype(&ccn_attr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex, &ccn_attr);
 
+	QSettings settings("UCLA_IRL", "KIWI");
+	localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
+
 	bRunning = true;
 	start();
 }
@@ -66,7 +69,7 @@ void MediaFetcher::initStream()
     QHash<QString,MediaSource *>::const_iterator it = sourceList->list.constBegin(); 
     for ( ; it != sourceList->list.constEnd(); ++it ) {
 		MediaSource *ms = it.value();
-        if (ms && !ms->isStreaming() && ms->username != getenv("KIWI_USERNAME")) {
+        if (ms && !ms->isStreaming() && ms->username != localUsername) {
             struct ccn_charbuf *templ = ccn_charbuf_create();
             struct ccn_charbuf *path = ccn_charbuf_create();
             ccn_charbuf_append_tt(templ, CCN_DTAG_Interest, CCN_DTAG);

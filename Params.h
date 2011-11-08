@@ -1,5 +1,6 @@
 #ifndef PARAMS_H
 #define PARAMS_H
+#include <QSettings>
 
 // Encoding Params
 #define FRAME_PER_SECOND 25 

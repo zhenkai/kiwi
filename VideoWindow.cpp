@@ -6,6 +6,9 @@
 #include <QPainter>
 #include <QRectF>
 #include "VideoWindow.h"
+#include <Params.h>
+#include <QLineEdit>
+#include <QInputDialog>
 
 #define MAX_NAME_LEN 30
 
@@ -14,6 +17,15 @@
  ***********************************/
 
 VideoWindow::VideoWindow(): QDialog(0) {
+	QSettings settings("UCLA_IRL", "KIWI");
+	localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
+	changeLocalUsername();
+	/*
+	if (localUsername == "") {
+		QTimer::singleShot(50, this, SLOT(changeLocalUsername()));
+	}
+	*/
+	QVBoxLayout *mainLayout = new QVBoxLayout;
 	layout = new QGridLayout(this);
 	source = new VideoStreamSource();
 	sink = new VideoStreamSink();
@@ -21,7 +33,23 @@ VideoWindow::VideoWindow(): QDialog(0) {
 	connect(sink, SIGNAL(sourceNumChanged(QString, int)), this, SLOT(alterDisplayNumber(QString, int)));
 //	connect(source, SIGNAL(imageCaptured(QString, const unsigned char *, int)), sink, SLOT(decodeImage(QString, const unsigned char *, int)));
 	connect(source, SIGNAL(imageCaptured(QString, IplImage *)), this, SLOT(refreshImage(QString, IplImage *)));
+	connect(changeUsernameButton, SIGNAL(clicked()), this, SLOT(changeLocalUsername()));
+	mainLayout->addWidget(changeUsernameButton);
+	mainLayout->addLayout(layout);
+	setLayout(mainLayout);
 	alterDisplayNumber("Me", 1);
+}
+
+void VideoWindow::changeLocalUsername() {
+	bool ok;
+
+	QString text = QInputDialog::getText(this, tr("Choose Your Username"), tr("Username:"), QLineEdit::Normal, localUsername, &ok);
+	if (ok && !text.isEmpty()) {
+		localUsername = text; 
+		QSettings settings("UCLA_IRL", "KIWI");
+		settings.setValue("KiwiLocalUsername", localUsername);
+	}
+
 }
 
 VideoWindow::~VideoWindow() {

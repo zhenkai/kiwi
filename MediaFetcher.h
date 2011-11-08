@@ -29,6 +29,7 @@ private:
 	QTimer *fetchTimer;
 	bool staleOk;
 	bool bRunning;
+	QString localUsername;
 };
 
 

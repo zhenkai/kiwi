@@ -4,7 +4,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QHash>
-
+#include <QPushButton>
 #include "VideoStreamSource.h"
 #include "VideoStreamSink.h"
 
@@ -28,6 +28,7 @@ public:
 public slots:
 	void refreshImage(QString name, IplImage *image);
 	void alterDisplayNumber(QString name, int addOrDel);
+	void changeLocalUsername();
 
 private:
 	QImage IplImage2QImage(const IplImage *iplImage);
@@ -37,6 +38,8 @@ private:
 	VideoStreamSink *sink;
 	QGridLayout *layout;
 	QHash<QString, QNamedFrame *> displays;
+	QString localUsername;
+	QPushButton *changeUsernameButton;
 };
 
 class QNamedFrame : public QWidget {
