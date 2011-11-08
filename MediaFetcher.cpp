@@ -118,7 +118,7 @@ void MediaFetcher::fetch() {
 	while (it != sourceList->list.constEnd()) {
 		QString userName = it.key();
 		MediaSource *ms = it.value();
-		if (ms != NULL && ms->isStreaming()) {
+		if (ms != NULL && ms->isStreaming() && ms->getSeq() >= 0) {
 			if (ms->needSendInterest()){
 				ms->incSeq();
 				struct ccn_charbuf *pathbuf = ccn_charbuf_create();
@@ -340,11 +340,11 @@ enum ccn_upcall_res handlePipeMediaContent(struct ccn_closure *selfp,
 		ms->incTimeouts();
 		// too many consecutive timeouts
 		// the other end maybe crashed or stopped generating video
-		if (ms->getTimeouts() > CONSECUTIVE_LOSS_THRESHOLD && ms->isStreaming()) {
+		if (ms->getTimeouts() > 2 * CONSECUTIVE_LOSS_THRESHOLD && ms->isStreaming()) {
 			// reset seq for this party
-			ms->setSeq(0);
+			ms->setSeq(-1);
 			ms->setStreaming(false);
-			fprintf(stderr, "%d consecutive losses!\n", CONSECUTIVE_LOSS_THRESHOLD);
+			fprintf(stderr, "%d consecutive losses!\n", 2 * CONSECUTIVE_LOSS_THRESHOLD);
 		}
 		return (CCN_UPCALL_RESULT_OK);
 	}
