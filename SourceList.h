@@ -23,7 +23,7 @@ public:
 
 	void run();
 	friend class MediaFetcher;
-	void stopAcceptingStaleData() {acceptStaleData = false;}
+	void stopAcceptingStaleData(); 
 	void handleSourceInfoContent(struct ccn_upcall_info *);
 	void enumerate();
 
@@ -39,9 +39,10 @@ signals:
 	void mediaSourceAdded(QString);
 	void mediaSourceImageDecoded(QString, IplImage *);
 public slots:
-	void alivenessTimerExpired(QString);
 	void imageDecoded(QString, IplImage *);
+	void checkAliveness();
 private:
+	QTimer *alivenessTimer;
 	QString username;
 	NdnHandler *nh;
 	QString confName;
@@ -65,7 +66,8 @@ public:
 	void refreshReceived();
 	bool isStreaming() { return streaming; }
 	bool needSendInterest(); 
-	bool getNeedExclude() {return needExclude; }
+	bool getNeedExclude();
+	bool getNeedRemove();
 	QString getUsername() {return username; }
 	QString getPrefix() {return namePrefix;}
 	void setPrefix(QString prefix) {namePrefix = prefix; }
@@ -77,27 +79,26 @@ public:
 	void resetTimeouts() {consecutiveTimeouts = 0;}
 	int getTimeouts() {return consecutiveTimeouts;}
 	void decodeImage(const unsigned char *buf, int len);
+	void setEmitted() {emitted = true;}
+	bool getEmitted() {return emitted;}
+	void setEmitTime();
 	friend class MediaFetcher;
 signals:
-	void alivenessTimeout(QString);
 	void imageDecoded(QString, IplImage *);
-private slots:
-	void excludeNotNeeded();
-	void noLongerActive();
 private:
 	VideoStreamDecoder *decoder;
 	QString namePrefix;
 	QString username;
 	long seq;
-	bool needExclude;
-	QTimer *freshnessTimer;
-	QTimer *alivenessTimer;
+	QDateTime lastRefreshTime;
+	QDateTime emitTime;
 	struct ccn_closure *fetchClosure;
 	struct ccn_closure *fetchPipelineClosure;
 	bool streaming;
 	int consecutiveTimeouts;
 	QHash<long, struct buffer_t *> frameBuffers;
 	long largestSeenSeq;
+	bool emitted;
 
 };
 

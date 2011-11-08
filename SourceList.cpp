@@ -16,6 +16,9 @@ SourceList::SourceList() {
 	pfds[0].fd = ccn_get_connection_fd(nh->h);
 	pfds[0].events = POLLIN;
 
+	alivenessTimer = new QTimer(this);
+	connect(alivenessTimer, SIGNAL(timeout()), this, SLOT(checkAliveness()));
+	alivenessTimer->start(ALIVE_PERIOD / 60 * 1000);
 	pthread_mutexattr_init(&ccn_attr);
 	pthread_mutexattr_settype(&ccn_attr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex, &ccn_attr);
@@ -80,13 +83,24 @@ void SourceList::readNdnParams() {
 	}
 }
 
-void SourceList::alivenessTimerExpired(QString username) {
-	MediaSource *ms = list[username];	
-	if (ms != NULL) {
-		delete ms;
-	}
-	list.remove(username);
-	emit mediaSourceLeft(username);
+void SourceList::checkAliveness() {
+
+    QHash<QString, MediaSource *>::iterator it = list.begin();
+    while (it != list.end())
+    {
+		MediaSource *ms = it.value();
+		if (ms && ms->getNeedRemove()) {
+			QString msUser = ms->getUsername();
+			it = list.erase(it);
+			if (!ms->getEmitted())
+				emit mediaSourceLeft(msUser);
+			delete ms;
+		}
+		else {
+			++it;
+		}
+    }
+
 }
 
 void SourceList::imageDecoded(QString name, IplImage *image) {
@@ -113,12 +127,15 @@ void SourceList::enumerate() {
 		++it;
     }
 
-	QString username = getenv("KIWI_USERNAME");
-	toExclude.append(username);
+	//QString username = getenv("KIWI_USERNAME");
+	//toExclude.append(username);
 
 	expressEnumInterest(path, toExclude);
 }
 
+void SourceList::stopAcceptingStaleData() {
+	acceptStaleData = false;
+}
 
 void SourceList::expressEnumInterest(struct ccn_charbuf *interest, QList<QString> &toExclude) {
 
@@ -189,8 +206,10 @@ void SourceList::expressEnumInterest(struct ccn_charbuf *interest, QList<QString
 			NdnHandler::excludeAll(templ);
 		}
 		ccn_charbuf_append_closer(templ); // </Exclude>
-		// accept stale data
-		ccnb_tagged_putf(templ, CCN_DTAG_AnswerOriginKind, "%d", 4); 
+		if (acceptStaleData) {
+			// accept stale data
+			ccnb_tagged_putf(templ, CCN_DTAG_AnswerOriginKind, "%d", 4); 
+		}
 
 		ccn_charbuf_append_closer(templ); // </Interest> 
 		int res = ccn_express_interest(nh->h, interest, discoverClosure, templ);
@@ -262,6 +281,7 @@ int SourceList::parseSourceInfoContent(const unsigned char *value, size_t len) {
 
 int SourceList::addMediaSource(QString username, QString prefix) {
 
+
 	QHash<QString, MediaSource *>::const_iterator it = list.find(username);
 	if (it != list.constEnd()) { // username exists
 		MediaSource *ms = it.value();
@@ -274,20 +294,31 @@ int SourceList::addMediaSource(QString username, QString prefix) {
 	
 	MediaSource *ms = new MediaSource(this, prefix, username);
 	list.insert(username, ms);
+
+	// do not report self to other module
+	if (username == getenv("KIWI_USERNAME")) {
+		fprintf(stderr, "ignore self\n");
+		return 0;
+	}
+
     emit mediaSourceAdded(username); 
     return 0;
 }
 
+// only removes from GUI
+// keep it here until leave object expires
 int SourceList::removeMediaSource(QString username) {
 	MediaSource *ms = list[username];
 	if (ms == NULL)
 		return -1;
 	
-	list.remove(username);
+	//list.remove(username);
 
 	emit mediaSourceLeft(username);
-	
-	delete ms;
+
+	ms->setEmitted();	
+	ms->setEmitTime();
+	//delete ms;
 }
 
 void SourceList::run() {
@@ -308,19 +339,12 @@ MediaSource::MediaSource(QObject *parent, QString prefix, QString username) {
 	decoder = new VideoStreamDecoder(BUF_SIZE);
 	largestSeenSeq = 0;
 	seq = 0;
-	needExclude = false;
 	streaming = false;
 	consecutiveTimeouts = 0;
 	namePrefix = prefix;
 	this->username = username;
-	freshnessTimer = new QTimer(this);
-	freshnessTimer->setInterval(FRESHNESS * 1000);
-	freshnessTimer->setSingleShot(true);
-	alivenessTimer = new QTimer(this);
-	alivenessTimer->setInterval(ALIVE_PERIOD * 1000);
-	alivenessTimer->setSingleShot(true);
-	connect(freshnessTimer, SIGNAL(timeout()), this, SLOT(excludeNotNeeded()));
-	connect(alivenessTimer, SIGNAL(timeout()), this, SLOT(noLongerActive()));
+	emitted = false;
+
 	connect(this, SIGNAL(alivenessTimeout(QString)), parent, SLOT(alivenessTimerExpired(QString)));
 	connect(this, SIGNAL(imageDecoded(QString, IplImage *)), parent, SLOT(imageDecoded(QString, IplImage *)));
 	fetchClosure = (struct ccn_closure *)calloc(1, sizeof(struct ccn_closure));
@@ -329,6 +353,7 @@ MediaSource::MediaSource(QObject *parent, QString prefix, QString username) {
 	fetchPipelineClosure = (struct ccn_closure *)calloc(1, sizeof(struct ccn_closure));
 	fetchPipelineClosure->data = this;
 	fetchPipelineClosure->p = NULL;
+	lastRefreshTime = QDateTime::currentDateTime();
 }
 
 MediaSource::~MediaSource() {
@@ -339,19 +364,38 @@ MediaSource::~MediaSource() {
 }
 
 void MediaSource::refreshReceived() {
-	needExclude = true;
-	freshnessTimer->stop();
-	freshnessTimer->start();
-	alivenessTimer->stop();
-	alivenessTimer->start();
+	lastRefreshTime = QDateTime::currentDateTime();
+	fprintf(stderr, "Exclude for %s\n", username.toStdString().c_str());
 }
 
-void MediaSource::excludeNotNeeded() {
-	needExclude = false;
+bool MediaSource::getNeedExclude() {
+	// always exclude those already leaved but had not been cleaned up yet
+	if (emitted)
+		return true;
+
+	QDateTime now = QDateTime::currentDateTime();
+	if (lastRefreshTime.secsTo(now) >= FRESHNESS) {
+		return false;
+	}
+
+	return true;
 }
 
-void MediaSource::noLongerActive() {
-	emit alivenessTimeout(username);	
+bool MediaSource::getNeedRemove() {
+	QDateTime now = QDateTime::currentDateTime();
+	if (lastRefreshTime.secsTo(now) >= ALIVE_PERIOD) {
+		return true;
+	}
+
+	if (emitted && emitTime.secsTo(now) >= FRESHNESS * 3) {
+		return true;
+	}
+
+	return false;
+}
+
+void MediaSource::setEmitTime() {
+	emitTime = QDateTime::currentDateTime();
 }
 
 bool MediaSource::needSendInterest() {
@@ -388,3 +432,5 @@ static enum ccn_upcall_res handle_source_info_content(struct ccn_closure *selfp,
 	return CCN_UPCALL_RESULT_OK;
 
 }
+
+

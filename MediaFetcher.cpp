@@ -66,7 +66,7 @@ void MediaFetcher::initStream()
     QHash<QString,MediaSource *>::const_iterator it = sourceList->list.constBegin(); 
     for ( ; it != sourceList->list.constEnd(); ++it ) {
 		MediaSource *ms = it.value();
-        if (ms && !ms->isStreaming()) {
+        if (ms && !ms->isStreaming() && ms->username != getenv("KIWI_USERNAME")) {
             struct ccn_charbuf *templ = ccn_charbuf_create();
             struct ccn_charbuf *path = ccn_charbuf_create();
             ccn_charbuf_append_tt(templ, CCN_DTAG_Interest, CCN_DTAG);

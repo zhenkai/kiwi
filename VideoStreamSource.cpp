@@ -301,6 +301,7 @@ void SourceAnnouncer::registerInterest() {
 }
 
 void SourceAnnouncer::generateSourceInfo() {
+	fprintf(stderr, "generating source info\n");
 	// e.g. /ndn/broadcast/conference/asfd/video-list/kiwi
 	struct ccn_charbuf *path = ccn_charbuf_create();
 	ccn_name_from_uri(path, (const char *)BROADCAST_PREFIX);
@@ -332,7 +333,7 @@ void SourceAnnouncer::generateSourceInfo() {
 	struct ccn_charbuf *signed_info = ccn_charbuf_create();
 	int freshness = 0;
 	if (leaving) {
-		freshness = FRESHNESS * 60;
+		freshness = FRESHNESS * 3;
 	} else
 		freshness = FRESHNESS;
 
