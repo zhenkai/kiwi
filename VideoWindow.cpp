@@ -21,7 +21,7 @@ VideoWindow::VideoWindow(): QDialog(0) {
 	localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
 	changeUsernameButton = new QPushButton("Change Username");
 	changeUsernameButton->setDefault(false);
-	enableButton = new QPushButton("Disable Video");
+	enableButton = new QPushButton("Disable My Video");
 	enableButton->setDefault(false);
 	enabled = true;
 
@@ -71,12 +71,12 @@ void VideoWindow::toggleEnabled() {
 			QImage image("default.jpg");
 			nf->setImage(image);
 		}
-		enableButton->setText("Enable Video");
+		enableButton->setText("Enable My Video");
 	}
 	else {
 		enabled = true;
 		source->toggleState();
-		enableButton->setText("Disable Video");
+		enableButton->setText("Disable My Video");
 	}
 }
 
