@@ -68,7 +68,7 @@ void VideoWindow::toggleEnabled() {
 		QNamedFrame *nf = NULL;
 		nf = displays["Me"];
 		if (nf != NULL)  {
-			QImage image;
+			QImage image("default.jpg");
 			nf->setImage(image);
 		}
 		enableButton->setText("Enable Video");
