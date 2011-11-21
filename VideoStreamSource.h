@@ -38,6 +38,7 @@ public:
 	VideoStreamSource();
 	~VideoStreamSource();
 	void setNamePrefix(QString prefix) {namePrefix = prefix;}
+	void toggleState();
 
 signals:
 	//void imageCaptured(QString, const unsigned char *, int);
@@ -65,6 +66,7 @@ private:
 	QString confName;
 	QString username;
 	bool bRunning;
+	bool enabled;
 };
 
 
@@ -74,6 +76,7 @@ public:
 	SourceAnnouncer(QString confName, QString prefix);
 	~SourceAnnouncer();
 	void run();
+	void toggleLeaving();
 
 public slots:
 	void generateSourceInfo();
@@ -88,6 +91,7 @@ private:
 	QTimer *announceTimer;
 	bool leaving;
 	bool bRunning;
+	bool enabled;
 };
 
 

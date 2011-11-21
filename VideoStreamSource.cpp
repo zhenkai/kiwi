@@ -90,8 +90,27 @@ VideoStreamSource::VideoStreamSource() {
 	captureTimer->start(1000 / FRAME_PER_SECOND);
 
 	bRunning = true;
+	enabled = true;
 	start();
 
+}
+
+void VideoStreamSource::toggleState() {
+	if (enabled) {
+		enabled = false;
+		if (cam != NULL) {
+			delete cam;
+			cam = NULL;
+		}
+		sa->toggleLeaving();
+	}
+	else {
+		if (cam == NULL) {
+			cam = new CameraVideoInput();
+		}
+		enabled = true;
+		sa->toggleLeaving();
+	}
 }
 
 VideoStreamSource::~VideoStreamSource() {
@@ -112,6 +131,9 @@ VideoStreamSource::~VideoStreamSource() {
 }
 
 void VideoStreamSource::processFrame() {
+	if (!enabled)
+		return;
+
 	IplImage *currentFrame = cam->getNextFrame();
 	int frameSize = 0;
 	// do not free encodedFrame, as it is a pointer to the internal buffer of encoder
@@ -245,8 +267,10 @@ void VideoStreamSource::generateNdnContent(const unsigned char *buffer, int len)
 
 void VideoStreamSource::run() {
 	int res = 0;
-	while(res >= 0 && bRunning) {
-		res = ccn_run(nh->h, 0);
+	while(res >= 0 && bRunning ) {
+		if (enabled) {
+			res = ccn_run(nh->h, 0);
+		}
 		usleep(1000000 / FRAME_PER_SECOND);
 	}
 }
@@ -254,6 +278,7 @@ void VideoStreamSource::run() {
 SourceAnnouncer::SourceAnnouncer(QString confName, QString prefix) {
 	gSourceAnnouncer = this;
 	leaving = false;
+	enabled = true;
 
 	this->confName = confName;
 	this->prefix = prefix;
@@ -273,6 +298,20 @@ SourceAnnouncer::SourceAnnouncer(QString confName, QString prefix) {
 
 	bRunning = true;
 	start();
+}
+
+void SourceAnnouncer::toggleLeaving() {
+	if (enabled) {
+		leaving = true;
+		generateSourceInfo();
+		usleep(10000);
+		enabled = false;
+	}
+	else {
+		leaving = false;
+		enabled = true;
+		generateSourceInfo();
+	}
 }
 
 SourceAnnouncer::~SourceAnnouncer() {
@@ -365,7 +404,9 @@ void SourceAnnouncer::generateSourceInfo() {
 void SourceAnnouncer::run() {
 	int res = 0;
 	while(res >= 0 && bRunning) {
-		res = ccn_run(nh->h, 0);
+		if (enabled) {
+			res = ccn_run(nh->h, 0);
+		}
 		usleep(10000);
 	}
 }

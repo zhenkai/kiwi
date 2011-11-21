@@ -285,11 +285,16 @@ int SourceList::addMediaSource(QString username, QString prefix) {
 	QHash<QString, MediaSource *>::const_iterator it = list.find(username);
 	if (it != list.constEnd()) { // username exists
 		MediaSource *ms = it.value();
-		ms->refreshReceived();
-		if (prefix != ms->getPrefix()) { // user updated prefix
-			ms->setPrefix(prefix);
+		if (ms != NULL) {
+			ms->refreshReceived();
+			if (prefix != ms->getPrefix()) { // user updated prefix
+				ms->setPrefix(prefix);
+			}
+			return 0;
 		}
-		return 0;
+		else {
+			list.remove(username);
+		}
 	}
 	
 	MediaSource *ms = new MediaSource(this, prefix, username);
@@ -347,7 +352,6 @@ MediaSource::MediaSource(QObject *parent, QString prefix, QString username) {
 	this->username = username;
 	emitted = false;
 
-	connect(this, SIGNAL(alivenessTimeout(QString)), parent, SLOT(alivenessTimerExpired(QString)));
 	connect(this, SIGNAL(imageDecoded(QString, IplImage *)), parent, SLOT(imageDecoded(QString, IplImage *)));
 	fetchClosure = (struct ccn_closure *)calloc(1, sizeof(struct ccn_closure));
 	fetchClosure->data = this;

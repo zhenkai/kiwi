@@ -19,13 +19,18 @@
 VideoWindow::VideoWindow(): QDialog(0) {
 	QSettings settings("UCLA_IRL", "KIWI");
 	localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
+	changeUsernameButton = new QPushButton("Change Username");
+	changeUsernameButton->setDefault(false);
+	enableButton = new QPushButton("Disable Video");
+	enableButton->setDefault(false);
+	enabled = true;
 
 	if (localUsername == "") {
 	//	QTimer::singleShot(50, this, SLOT(changeLocalUsername()));
 		changeLocalUsername();
 	}
 	QVBoxLayout *mainLayout = new QVBoxLayout;
-	layout = new QGridLayout(this);
+	layout = new QGridLayout;
 	source = new VideoStreamSource();
 	sink = new VideoStreamSink();
 	connect(sink->sourceList, SIGNAL(mediaSourceImageDecoded(QString, IplImage *)), this, SLOT(refreshImage(QString, IplImage *)));
@@ -33,7 +38,12 @@ VideoWindow::VideoWindow(): QDialog(0) {
 //	connect(source, SIGNAL(imageCaptured(QString, const unsigned char *, int)), sink, SLOT(decodeImage(QString, const unsigned char *, int)));
 	connect(source, SIGNAL(imageCaptured(QString, IplImage *)), this, SLOT(refreshImage(QString, IplImage *)));
 	connect(changeUsernameButton, SIGNAL(clicked()), this, SLOT(changeLocalUsername()));
-	mainLayout->addWidget(changeUsernameButton);
+	connect(enableButton, SIGNAL(clicked()), this, SLOT(toggleEnabled()));
+
+	QHBoxLayout *buttonLayout = new QHBoxLayout;
+	buttonLayout->addWidget(changeUsernameButton);
+	buttonLayout->addWidget(enableButton);
+	mainLayout->addLayout(buttonLayout);
 	mainLayout->addLayout(layout);
 	setLayout(mainLayout);
 	alterDisplayNumber("Me", 1);
@@ -49,6 +59,25 @@ void VideoWindow::changeLocalUsername() {
 		settings.setValue("KiwiLocalUsername", localUsername);
 	}
 
+}
+
+void VideoWindow::toggleEnabled() {
+	if (enabled) {
+		enabled = false;
+		source->toggleState();
+		QNamedFrame *nf = NULL;
+		nf = displays["Me"];
+		if (nf != NULL)  {
+			QImage image;
+			nf->setImage(image);
+		}
+		enableButton->setText("Enable Video");
+	}
+	else {
+		enabled = true;
+		source->toggleState();
+		enableButton->setText("Disable Video");
+	}
 }
 
 VideoWindow::~VideoWindow() {

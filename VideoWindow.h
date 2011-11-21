@@ -29,6 +29,7 @@ public slots:
 	void refreshImage(QString name, IplImage *image);
 	void alterDisplayNumber(QString name, int addOrDel);
 	void changeLocalUsername();
+	void toggleEnabled();
 
 private:
 	QImage IplImage2QImage(const IplImage *iplImage);
@@ -40,6 +41,8 @@ private:
 	QHash<QString, QNamedFrame *> displays;
 	QString localUsername;
 	QPushButton *changeUsernameButton;
+	QPushButton *enableButton;
+	bool enabled;
 };
 
 class QNamedFrame : public QWidget {
