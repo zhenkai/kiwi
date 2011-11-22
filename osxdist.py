@@ -303,7 +303,7 @@ if __name__ == '__main__':
 	a = AppBundle('kiwi.app', ver)
 	a.copy_qt_plugins()
 	a.handle_libs()
-	a.copy_resources(['kiwi.icns'])
+	a.copy_resources(['kiwi.icns', 'qt.conf'])
 	a.update_plist()
 	if not options.universal:
 		a.set_min_macosx_version('10.5.0')
