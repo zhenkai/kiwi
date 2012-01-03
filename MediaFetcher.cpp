@@ -315,6 +315,7 @@ enum ccn_upcall_res handleMediaContent(struct ccn_closure *selfp,
 
 	switch (kind) {
 	case CCN_UPCALL_INTEREST_TIMED_OUT: {
+		fprintf(stderr, "reexpressing short interest\n");
 		return (CCN_UPCALL_RESULT_REEXPRESS);
 	}
 	case CCN_UPCALL_CONTENT_UNVERIFIED:
