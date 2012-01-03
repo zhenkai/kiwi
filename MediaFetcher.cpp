@@ -155,8 +155,12 @@ void MediaFetcher::initPipe(struct ccn_closure *selfp, struct ccn_upcall_info *i
 	if (!ms)
 		return;
 
+	/*
 	if (ms->isStreaming())
 		return;
+		*/
+	
+	fprintf(stderr, "Initializing pipe\n");
 
 	const unsigned char *ccnb = info->content_ccnb;
 	size_t ccnb_size = info->pco->offset[CCN_PCO_E];
