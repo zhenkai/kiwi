@@ -94,6 +94,7 @@ void MediaFetcher::initStream()
 				fprintf(stderr, "Express short interest failed\n");
 			}
 			pthread_mutex_unlock(&mutex);
+			fprintf(stderr, "Initiated streams\n");
 			ms->setStreaming(true);
             ccn_charbuf_destroy(&path);
             ccn_charbuf_destroy(&templ);
@@ -183,7 +184,6 @@ void MediaFetcher::initPipe(struct ccn_closure *selfp, struct ccn_upcall_info *i
 	}
 	if (seq >= 0) {
 		ms->setSeq(seq);
-		ms->setStreaming(true);
 		ms->largestSeenSeq = seq;
 	}
 	else {
@@ -348,7 +348,7 @@ enum ccn_upcall_res handlePipeMediaContent(struct ccn_closure *selfp,
 		ms->incTimeouts();
 		// too many consecutive timeouts
 		// the other end maybe crashed or stopped generating video
-		if (ms->getTimeouts() > CONSECUTIVE_LOSS_THRESHOLD && ms->isStreaming()) {
+		if (ms->getTimeouts() > CONSECUTIVE_LOSS_THRESHOLD) {
 			// reset seq for this party
 			ms->setSeq(0);
 			ms->setStreaming(false);
