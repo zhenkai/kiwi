@@ -13,7 +13,9 @@ NdnHandler::NdnHandler() {
 NdnHandler::~NdnHandler() {
 	if (h != NULL) {
 		ccn_disconnect(h);
-		ccn_destroy(&h);
+		// destory will can crash at 
+		// ccn_destroy -> ccn_destroy_interest-> ccn_replace_handler
+//		ccn_destroy(&h);
 	}
 	if (keystore != NULL) {
 		ccn_keystore_destroy(&keystore);

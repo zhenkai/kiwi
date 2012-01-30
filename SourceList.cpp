@@ -363,8 +363,12 @@ MediaSource::MediaSource(QObject *parent, QString prefix, QString username) {
 }
 
 MediaSource::~MediaSource() {
+	/* Memory leak: but don't free it for now
+	 * as it may cause crash when ccn_replace_handler is
+	 * called by the library
 	if (fetchClosure != NULL)
 		free(fetchClosure);
+		*/
 	if (decoder != NULL)
 		delete decoder;
 }
