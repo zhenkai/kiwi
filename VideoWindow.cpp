@@ -182,13 +182,15 @@ void VideoWindow::alterDisplayNumber(QString name, int addOrDel) {
 				QHash<QString, QNamedFrame *>::const_iterator i = displays.constBegin();
 				while(i != displays.constEnd()) {
 					QNamedFrame *qf = i.value();
-					int qfPos = qf->getPosition();
-					if (qfPos > pos) {
-						qfPos--;
-						qf->setPosition(qfPos);
-						struct coordinates co = posTable[qfPos - 1];
-						layout->removeWidget(qf);
-						layout->addWidget(qf, co.row, co.col);
+					if (qf != NULL) {
+						int qfPos = qf->getPosition();
+						if (qfPos > pos) {
+							qfPos--;
+							qf->setPosition(qfPos);
+							struct coordinates co = posTable[qfPos - 1];
+							layout->removeWidget(qf);
+							layout->addWidget(qf, co.row, co.col);
+						}
 					}
 					i++;
 				}
