@@ -21,9 +21,9 @@ VideoWindow::VideoWindow(): QDialog(0) {
 	localUsername = settings.value("KiwiLocalUsername", QString("")).toString();
 	changeUsernameButton = new QPushButton("Change Username");
 	changeUsernameButton->setDefault(false);
-	enableButton = new QPushButton("Disable My Video");
+	enableButton = new QPushButton("Enable My Video");
 	enableButton->setDefault(false);
-	enabled = true;
+	enabled = false;
 
 	if (localUsername == "") {
 	//	QTimer::singleShot(50, this, SLOT(changeLocalUsername()));

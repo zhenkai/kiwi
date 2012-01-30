@@ -90,7 +90,7 @@ VideoStreamSource::VideoStreamSource() {
 	captureTimer->start(1000 / FRAME_PER_SECOND);
 
 	bRunning = true;
-	enabled = true;
+	enabled = false;
 	start();
 
 }
@@ -278,7 +278,7 @@ void VideoStreamSource::run() {
 SourceAnnouncer::SourceAnnouncer(QString confName, QString prefix) {
 	gSourceAnnouncer = this;
 	leaving = false;
-	enabled = true;
+	enabled = false;
 
 	this->confName = confName;
 	this->prefix = prefix;
