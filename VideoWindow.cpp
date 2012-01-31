@@ -105,14 +105,13 @@ QImage VideoWindow::IplImage2QImage(const IplImage *iplImage) {
 	int displayNum = displays.size();
 	int scaleHeight;
 	switch (displayNum) {
-	case 1:  
-	case 2:
-	//case 2: scaleHeight = 320; break;
+	case 1:  scaleHeight = 480; break;
+	case 2:  scaleHeight = 480; break;
 	case 3: 
 	case 4:
 	case 5:
-	case 6: scaleHeight = 270; break;
-	default: scaleHeight = 220; 
+	case 6: scaleHeight = 320; break;
+	default: scaleHeight = 320; 
 	}
 
 	if (iplImage->depth == IPL_DEPTH_8U && iplImage->nChannels == 3) {
