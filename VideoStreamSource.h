@@ -24,8 +24,8 @@ public:
 	CameraVideoInput();
 	virtual ~CameraVideoInput();
 	IplImage *getNextFrame();
-private:
 	bool initCamera();
+	void releaseCamera();
 private:
 	CvCapture *cap;
 	bool initialized;

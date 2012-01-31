@@ -24,6 +24,14 @@ CameraVideoInput::~CameraVideoInput() {
 	}
 }
 
+void CameraVideoInput::releaseCamera() {
+	if (cap != NULL) {
+		cvReleaseCapture(&cap);
+		cap = NULL;
+		initialized = false;
+	}
+}
+
 bool CameraVideoInput::initCamera() {
 	if (initialized == true)
 		return true;
@@ -89,6 +97,8 @@ VideoStreamSource::VideoStreamSource() {
 	connect(captureTimer, SIGNAL(timeout()), this, SLOT(processFrame()));
 	captureTimer->start(1000 / FRAME_PER_SECOND);
 
+	cam->releaseCamera();
+
 	bRunning = true;
 	enabled = false;
 	start();
@@ -99,14 +109,13 @@ void VideoStreamSource::toggleState() {
 	if (enabled) {
 		enabled = false;
 		if (cam != NULL) {
-			delete cam;
-			cam = NULL;
+			cam->releaseCamera();
 		}
 		sa->toggleLeaving();
 	}
 	else {
-		if (cam == NULL) {
-			cam = new CameraVideoInput();
+		if (cam != NULL) {
+			cam->initCamera();
 		}
 		enabled = true;
 		sa->toggleLeaving();
