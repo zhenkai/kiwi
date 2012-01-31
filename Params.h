@@ -5,8 +5,8 @@
 // Encoding Params
 #define FRAME_PER_SECOND 25 
 #define GROUP_OF_PICTURES 15 
-//#define STREAM_BIT_RATE 512000
-#define STREAM_BIT_RATE 128000
+#define STREAM_BIT_RATE 512000
+//#define STREAM_BIT_RATE 128000
 #define MAX_EDGE_LENGTH 640
 
 // Encoding and decoding buffer size
