@@ -251,6 +251,7 @@ int SourceList::parseSourceInfoContent(const unsigned char *value, size_t len) {
    
     QString username, qPrefix;
 	bool leaving = false;
+	bool enabled = false;
     QDomElement docElem = doc.documentElement();  // <user> 
     QDomNode node = docElem.firstChild();  // <username>
     while (!node.isNull()) {
@@ -262,9 +263,16 @@ int SourceList::parseSourceInfoContent(const unsigned char *value, size_t len) {
 		} else 
 		if (node.nodeName() == "leave") {
 			leaving = true;
+		} else
+		if (node.nodeName() == "enabled") {
+			enabled = true;
 		}
         node = node.nextSibling();
     }
+
+	if (!enabled) {
+		emit imageDecoded(username, NULL);
+	}
 
 	if (username == "")
 		return -1;

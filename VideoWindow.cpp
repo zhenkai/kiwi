@@ -128,8 +128,6 @@ QImage VideoWindow::IplImage2QImage(const IplImage *iplImage) {
 }
 
 void VideoWindow::refreshImage(QString name, IplImage *iplImage) {
-	if (iplImage == NULL)
-		return;
 
 	QImage image = IplImage2QImage(iplImage);
 	QNamedFrame *nf = NULL;

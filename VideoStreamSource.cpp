@@ -313,13 +313,11 @@ void SourceAnnouncer::toggleLeaving() {
 	if (enabled) {
 		//leaving = true;
 		// avoid leaving too frequently
-		leaving = false;
-		generateSourceInfo();
-		usleep(10000);
 		enabled = false;
+		generateSourceInfo();
+
 	}
 	else {
-		leaving = false;
 		enabled = true;
 		generateSourceInfo();
 	}
@@ -373,6 +371,9 @@ void SourceAnnouncer::generateSourceInfo() {
 		qsInfo.append("<leave>true</leave>");
 		fprintf(stderr, "generating leave message\n");
 	}
+	if (enabled) {
+		qsInfo.append("<enabled>true</enabled>");
+	}
 	qsInfo.append("</user>");
 
 	QByteArray qba = qsInfo.toLocal8Bit();
@@ -415,10 +416,8 @@ void SourceAnnouncer::generateSourceInfo() {
 void SourceAnnouncer::run() {
 	int res = 0;
 	while(res >= 0 && bRunning) {
-		if (enabled) {
-			res = ccn_run(nh->h, 0);
-		}
-		usleep(10000);
+		res = ccn_run(nh->h, 0);
+		usleep(20000);
 	}
 }
 
