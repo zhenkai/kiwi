@@ -96,6 +96,8 @@ void MediaFetcher::initStream()
 			pthread_mutex_unlock(&mutex);
 			fprintf(stderr, "Initiated streams\n");
 			ms->setStreaming(true);
+			ms->resetTimeouts();
+			fprintf(stderr, "Reset timeouts in initStreams\n");
             ccn_charbuf_destroy(&path);
             ccn_charbuf_destroy(&templ);
         }
@@ -123,7 +125,7 @@ void MediaFetcher::fetch() {
 	while (it != sourceList->list.constEnd()) {
 		QString userName = it.key();
 		MediaSource *ms = it.value();
-		if (ms != NULL && ms->isStreaming()) {
+		if (ms != NULL && ms->getSeq() > 0) {
 			if (ms->needSendInterest()){
 				ms->incSeq();
 				struct ccn_charbuf *pathbuf = ccn_charbuf_create();
@@ -324,6 +326,7 @@ enum ccn_upcall_res handleMediaContent(struct ccn_closure *selfp,
 
 	// got some data, reset consecutiveTimeouts
 	ms->resetTimeouts();
+	fprintf(stderr, "Reset timeouts in handleMediaContent\n");
 
 	gMediaFetcher->processContent(selfp, info);
 
@@ -344,9 +347,9 @@ enum ccn_upcall_res handlePipeMediaContent(struct ccn_closure *selfp,
 		ms->incTimeouts();
 		// too many consecutive timeouts
 		// the other end maybe crashed or stopped generating video
-		if (ms->getTimeouts() > CONSECUTIVE_LOSS_THRESHOLD) {
+		if (ms->getTimeouts() >= CONSECUTIVE_LOSS_THRESHOLD) {
 			// reset seq for this party
-			ms->setSeq(0);
+			ms->setSeq(-1);
 			ms->setStreaming(false);
 			fprintf(stderr, "%d consecutive losses!\n", CONSECUTIVE_LOSS_THRESHOLD);
 		}

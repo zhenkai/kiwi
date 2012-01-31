@@ -76,7 +76,7 @@ public:
 	void setSeq(long seq) {this->seq = seq;}
 	long getSeq() {return seq;}
 	void incTimeouts(){consecutiveTimeouts++;}
-	void resetTimeouts() {consecutiveTimeouts = 0;}
+	void resetTimeouts();
 	int getTimeouts() {return consecutiveTimeouts;}
 	void decodeImage(const unsigned char *buf, int len);
 	void setEmitted() {emitted = true;}

@@ -342,10 +342,14 @@ void SourceList::run() {
 	}
 }
 
+void MediaSource::resetTimeouts() {
+	consecutiveTimeouts = 0;
+}
+
 MediaSource::MediaSource(QObject *parent, QString prefix, QString username) {
 	decoder = new VideoStreamDecoder(BUF_SIZE);
 	largestSeenSeq = 0;
-	seq = 0;
+	seq = -1;
 	streaming = false;
 	consecutiveTimeouts = 0;
 	namePrefix = prefix;
