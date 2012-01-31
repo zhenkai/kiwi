@@ -129,6 +129,14 @@ QImage VideoWindow::IplImage2QImage(const IplImage *iplImage) {
 
 void VideoWindow::refreshImage(QString name, IplImage *iplImage) {
 
+	if (iplImage == NULL) {
+		alterDisplayNumber(name, 0);
+		return;
+	}
+
+	if (!displays.contains(name)) {
+		alterDisplayNumber(name, 1);
+	}
 	QImage image = IplImage2QImage(iplImage);
 	QNamedFrame *nf = NULL;
 	nf = displays[name];
