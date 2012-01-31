@@ -96,6 +96,9 @@ void SourceList::checkAliveness() {
 				emit mediaSourceLeft(msUser);
 			delete ms;
 		}
+		else if (ms == NULL) {
+			it = list.erase(it);
+		}
 		else {
 			++it;
 		}

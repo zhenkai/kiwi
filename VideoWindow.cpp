@@ -179,8 +179,8 @@ void VideoWindow::alterDisplayNumber(QString name, int addOrDel) {
 				int pos = disp->getPosition();
 				delete disp;
 				displays.remove(name);
-				QHash<QString, QNamedFrame *>::const_iterator i = displays.constBegin();
-				while(i != displays.constEnd()) {
+				QHash<QString, QNamedFrame *>::iterator i = displays.begin();
+				while(i != displays.end()) {
 					QNamedFrame *qf = i.value();
 					if (qf != NULL) {
 						int qfPos = qf->getPosition();
@@ -191,8 +191,12 @@ void VideoWindow::alterDisplayNumber(QString name, int addOrDel) {
 							layout->removeWidget(qf);
 							layout->addWidget(qf, co.row, co.col);
 						}
+						++i;
 					}
-					i++;
+					else {
+						i = displays.erase(i);
+					}
+
 				}
 			} else {
 				qWarning() << "User frame was set to NULL: " + name + " \n";
