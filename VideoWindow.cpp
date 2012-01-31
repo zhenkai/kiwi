@@ -154,6 +154,7 @@ void VideoWindow::alterDisplayNumber(QString name, int addOrDel) {
 	if (addOrDel > 0) {
 		if (displays.contains(name)	) {
 			qWarning() << "User " + name + " already exists. No display added.\n";
+			adjustSize();
 			return;
 		}
 		qWarning() << "User " + name + " added.\n";
@@ -169,6 +170,7 @@ void VideoWindow::alterDisplayNumber(QString name, int addOrDel) {
 	else {
 		if (!displays.contains(name)) {
 			qWarning() << "User " + name + " does not exist. No display deleted.\n";
+			adjustSize();
 			return;
 		}
 		else {
@@ -198,6 +200,7 @@ void VideoWindow::alterDisplayNumber(QString name, int addOrDel) {
 
 				}
 			} else {
+				adjustSize();
 				qWarning() << "User frame was set to NULL: " + name + " \n";
 				return;
 			}

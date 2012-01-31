@@ -311,7 +311,9 @@ SourceAnnouncer::SourceAnnouncer(QString confName, QString prefix) {
 
 void SourceAnnouncer::toggleLeaving() {
 	if (enabled) {
-		leaving = true;
+		//leaving = true;
+		// avoid leaving too frequently
+		leaving = false;
 		generateSourceInfo();
 		usleep(10000);
 		enabled = false;
