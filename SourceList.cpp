@@ -322,6 +322,8 @@ int SourceList::removeMediaSource(QString username) {
 	if (ms == NULL)
 		return -1;
 	
+	// should also set refresh
+	ms->refreshReceived();
 	//list.remove(username);
 
 	emit mediaSourceLeft(username);
@@ -404,7 +406,7 @@ bool MediaSource::getNeedRemove() {
 		return true;
 	}
 
-	if (emitted && emitTime.secsTo(now) >= FRESHNESS * 3) {
+	if (emitted && emitTime.secsTo(now) >= FRESHNESS) {
 		return true;
 	}
 

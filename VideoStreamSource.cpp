@@ -383,7 +383,7 @@ void SourceAnnouncer::generateSourceInfo() {
 	struct ccn_charbuf *signed_info = ccn_charbuf_create();
 	int freshness = 0;
 	if (leaving) {
-		freshness = FRESHNESS * 3;
+		freshness = FRESHNESS;
 	} else
 		freshness = FRESHNESS;
 
